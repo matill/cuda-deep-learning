@@ -31,9 +31,8 @@ __global__ void layer_compute(layer_t layer, vector_t in_vector, vector_t out_ve
 
     // out_vector = weights * in_vector + bias
     matrix_vector_multiply(weights, in_vector, out_vector);
-
     out_vector.vals[threadIdx.x] += bias.vals[threadIdx.x];
-    
+
     switch (layer.activation_func) {
         case SOFTMAX:
             apply_softmax(out_vector);
