@@ -30,6 +30,13 @@ void matrix_host_to_device(matrix_t *device_matrix, matrix_t *host_matrix);
 
 
 // __device__ inline f32 *matrix_index(matrix_t matrix, u32 i, u32 j);
+
+__device__ inline f32 *matrix_index(matrix_t matrix, u32 i, u32 j) {
+    return &matrix.vals[i + matrix.stride * j];
+}
+
 __device__ void matrix_vector_multiply(matrix_t in_matrix, vector_t in_vector, vector_t out_vector);
+__device__ f32 vector_dot(vector_t a, vector_t b);
+
 
 #endif

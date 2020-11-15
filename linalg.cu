@@ -48,11 +48,6 @@ void matrix_host_to_device(matrix_t *device_matrix, matrix_t *host_matrix) {
     ASSERT_EQ_INT(x, 0);
 }
 
-
-__device__ inline f32 *matrix_index(matrix_t matrix, u32 i, u32 j) {
-    return &matrix.vals[i + matrix.stride * j];
-}
-
 __device__ void matrix_vector_multiply(matrix_t in_matrix, vector_t in_vector, vector_t out_vector) {
     ASSERT_EQ_INT(in_matrix.width, in_vector.size);
     ASSERT_EQ_INT(in_matrix.height, out_vector.size);
@@ -70,3 +65,13 @@ __device__ void matrix_vector_multiply(matrix_t in_matrix, vector_t in_vector, v
     out_vector.vals[threadIdx.x] = thread_val;
 }
 
+// TODO: Optimize
+__device__ f32 vector_dot(vector_t a, vector_t b) {
+    ASSERT_EQ_INT(a.size, b.size);
+    f32 sum = 0;
+    for (u32 i = 0; i != a.size; i++) {
+        sum += a.vals[i] * b.vals[i];
+    }
+
+    return sum;
+}
