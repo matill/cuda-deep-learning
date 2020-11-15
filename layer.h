@@ -21,5 +21,6 @@ typedef struct layer {
 
 void layer_init(layer_t *layer, u32 in_dimension, u32 out_dimension, activation_func_t activation_func);
 
+__global__ void layer_compute(layer_t layer, vector_t in_vector, vector_t out_vector);
 
 #endif
