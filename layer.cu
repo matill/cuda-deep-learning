@@ -51,3 +51,33 @@ __global__ void layer_compute(layer_t layer, vector_t in_vector, vector_t out_ve
     }
 }
 
+
+// TODO: Only accept subsets of the structs
+__global__ void transform_gradient_y_to_v_softmax(vector_t y_gradient, vector_t y) {
+    f32 sigma_c = vector_dot(y_gradient, y);
+    __syncthreads();
+    u32 k = threadIdx.x;
+    f32 y_k = y.vals[k];
+    f32 *y_k_derivative = &y_gradient.vals[k];
+    *y_k_derivative = y_k * (*y_k_derivative  - sigma_c);
+}
+
+
+// TODO: Only accept subsets of the structs
+__global__ void transform_gradient_y_to_v_sigmoid(vector_t y_gradient, vector_t y) {
+    u32 k = threadIdx.x;
+    f32 y_k = y.vals[k];
+    y_gradient.vals[k] = y_k * (y_k - 1) * y_gradient.vals[k];
+}
+
+
+// Call with
+// gridDim.x = layer.out_dim
+// blockDim.x = layer.in_dim
+__global__ void compute_weight_gradient(matrix_t w_derivative_out, vector_t v_gradient, vector_t y_minus) {
+    u32 i = blockIdx.x;
+    u32 j = gridDim.x;
+    f32 v_gradient_i = v_gradient.vals[i];
+    f32 y_minus_j = y_minus.vals[j];
+    *matrix_index(w_derivative_out, i, j) = v_gradient_i * y_minus_j;
+}
