@@ -52,22 +52,38 @@ __global__ void layer_compute(layer_t layer, vector_t in_vector, vector_t out_ve
 }
 
 
-// TODO: Only accept subsets of the structs
-__global__ void transform_gradient_y_to_v_softmax(vector_t y_gradient, vector_t y) {
-    f32 sigma_c = vector_dot(y_gradient, y);
-    __syncthreads();
+__global__ void compute_gradient_v_plus_to_v(vector_t v_gradient, vector_t v_plus_gradient, matrix_t w_plus, vector_t y, activation_func_t activation_func) {
+    // Compute dJ / dy(r)
     u32 k = threadIdx.x;
-    f32 y_k = y.vals[k];
-    f32 *y_k_derivative = &y_gradient.vals[k];
-    *y_k_derivative = y_k * (*y_k_derivative  - sigma_c);
-}
+    f32 y_k_derivarive = 0;
+    u32 num_iters = w_plus.height;
+    for (u32 i = 0; i != num_iters; i++) {
+        y_k_derivarive += v_plus_gradient.vals[i] * matrix_index(w_plus, i, k);
+    }
 
-
-// TODO: Only accept subsets of the structs
-__global__ void transform_gradient_y_to_v_sigmoid(vector_t y_gradient, vector_t y) {
-    u32 k = threadIdx.x;
+    // Compute dJ / dv(r) according to activation function
+    f32 v_k_derivative;
     f32 y_k = y.vals[k];
-    y_gradient.vals[k] = y_k * (y_k - 1) * y_gradient.vals[k];
+    switch (activation_func) {
+        case SIGMOID:
+            v_k_derivative = y_k * (y_k - 1) * y_k_derivarive;
+            break;
+
+        case SOFTMAX:
+            // Temporarily store all y_k_derivative in shared memory to compute sigma_c
+            // TODO: More efficient (parallel and shared) computation of sigma_c
+            v_gradient.vals[k] = y_k_derivarive;
+            __syncthreads();
+            f32 sigma_c = vector_dot(v_gradient, y);
+
+            // Compute v derivatives according to formulas. Sync to avoid modifying v_gradient buffer before all threads are done using it
+            __syncthreads();
+            v_k_derivative = y_k * (y_k_derivative  - sigma_c);
+            break;
+    }
+
+    // Store derivatives in output vector
+    v_gradient.vals[k] = v_k_derivative;
 }
 
 
