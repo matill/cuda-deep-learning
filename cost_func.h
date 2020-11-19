@@ -9,7 +9,7 @@ typedef enum {
 } cost_func_t;
 
 
-__device__ f32 compute_output_layer_y_gradient(vector_t estimate, vector_t truth, cost_func_t cost_func);
+__device__ f32 compute_output_layer_y_gradient(device_vector_t estimate, device_vector_t truth, cost_func_t cost_func);
 
 
 #endif

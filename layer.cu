@@ -4,31 +4,22 @@
 #include "cost_func.h"
 
 
-void layer_init(layer_t *layer, u32 in_dimension, u32 out_dimension, activation_func_t activation_func) {
-    layer->in_dimension = in_dimension;
-    layer->out_dimension = out_dimension;
-    layer->activation_func = activation_func;
-    matrix_init(&layer->weights, out_dimension, in_dimension);
-    vector_init(&layer->bias, out_dimension);
-}
-
-
 void layer_init(layer_t *layer, layer_builder_t *layer_builder, f32 **param_buffer) {
     layer->in_dimension = layer_builder->in_dimension;
     layer->out_dimension = layer_builder->out_dimension;
     layer->activation_func = layer_builder->activation_func;
     u32 height = layer->out_dimension;
     u32 width = layer->in_dimension;
-    matrix_init_from_buf(layer->params.weights, height, width, param_buffer);
-    vector_init_from_buf(layer->params.bias, height, param_buffer);
+    matrix_init_from_buf(&layer->params.weights, height, width, param_buffer);
+    vector_init_from_buf(&layer->params.bias, height, param_buffer);
 }
 
 
 __global__ void layer_compute(layer_t layer, device_vector_t in_vector, device_vector_t out_vector) {
     ASSERT_EQ_INT(layer.in_dimension, in_vector.size);
     ASSERT_EQ_INT(layer.out_dimension, out_vector.size);
-    device_matrix_t weights = layer.weights;
-    device_vector_t bias = layer.bias;
+    device_matrix_t weights = layer.params.weights;
+    device_vector_t bias = layer.params.bias;
 
     // out_vector = weights * in_vector + bias
     matrix_vector_multiply(weights, in_vector, out_vector);

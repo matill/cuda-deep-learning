@@ -32,7 +32,7 @@ typedef struct mlp_trainer {
 } mlp_trainer_t;
 
 
-void network_compute(mlp_t *mlp, vector_t *layer_outputs, vector_t *in_vector);
+void network_compute(mlp_t *mlp, device_vector_t *layer_outputs, device_vector_t *in_vector);
 
 mlp_builder_t mlp_builder_create(u32 in_dimension);
 void mlp_builder_add_layer(mlp_builder_t *mlp_builder, u32 out_dimension, activation_func_t activation_func);
