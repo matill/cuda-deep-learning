@@ -13,3 +13,8 @@ __global__ void cross_entropy_derivative(vector_t estimate, vector_t truth, vect
     estimate_gradient.vals[k] = truth_k / estimate_k;
 }
 
+
+__device__ f32 compute_output_layer_y_gradient(vector_t estimate, vector_t truth, cost_func_t cost_func) {
+
+}
+
