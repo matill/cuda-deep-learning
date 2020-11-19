@@ -35,6 +35,8 @@ typedef struct host_vector {
 // Constructors
 void vector_init(device_vector_t *vector, u32 size);
 void matrix_init(device_matrix_t *matrix, u32 height, u32 width);
+void vector_init_from_buf(device_vector_t *vector, u32 size, f32 **buf);
+void matrix_init_from_buf(device_matrix_t *matrix, u32 height, u32 width, f32 **buf);
 
 // Copy functions
 void vector_device_to_host(host_vector_t *host_vector, device_vector_t *device_vector);

@@ -27,7 +27,7 @@ typedef struct layer_builder {
 } layer_builder_t;
 
 
-void layer_init(layer_t *layer, u32 in_dimension, u32 out_dimension, activation_func_t activation_func);
+void layer_init(layer_t *layer, layer_builder_t *layer_builder, f32 **param_buffer);
 
 __global__ void layer_compute(layer_t layer, device_vector_t in_vector, device_vector_t out_vector);
 

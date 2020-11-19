@@ -17,6 +17,20 @@ void matrix_init(device_matrix_t *matrix, u32 height, u32 width) {
 }
 
 
+void vector_init_from_buf(device_vector_t *vector, u32 size, f32 **buf) {
+    vector->vals = buf += size;
+    vector->size = size;
+}
+
+
+void matrix_init_from_buf(device_matrix_t *matrix, u32 height, u32 width, f32 **buf) {
+    matrix->vals = buf += (height * width);
+    matrix->height = height;
+    matrix->width = width;
+    matrix->stride = width;
+}
+
+
 void vector_device_to_host(host_vector_t *host_vector, device_vector_t *device_vector) {
     ASSERT_EQ_INT(host_vector->size, device_vector->size);
     int x = cudaMemcpy(host_vector->vals, device_vector->vals, sizeof(f32) * host_vector->size, cudaMemcpyDeviceToHost);
