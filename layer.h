@@ -3,11 +3,7 @@
 
 #include "common.h"
 #include "linalg.h"
-
-
-typedef enum {
-    SIGMOID, SOFTMAX
-} activation_func_t;
+#include "activation_func.h"
 
 
 typedef struct layer {
