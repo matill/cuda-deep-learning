@@ -2,7 +2,7 @@
 #include "linalg.h"
 
 
-inline __device__ f32 cross_entropy_derivative(vector_t estimate, vector_t truth) {
+inline __device__ f32 cross_entropy_derivative(device_vector_t estimate, device_vector_t truth) {
     // dJ/dy(L)_k = y_k / y(L)_k
     u32 k = threadIdx.x;
     f32 truth_k = truth.vals[k];
@@ -11,7 +11,7 @@ inline __device__ f32 cross_entropy_derivative(vector_t estimate, vector_t truth
 }
 
 
-__device__ f32 compute_output_layer_y_gradient(vector_t y_out, vector_t y_out_expected, cost_func_t cost_func) {
+__device__ f32 compute_output_layer_y_gradient(device_vector_t y_out, device_vector_t y_out_expected, cost_func_t cost_func) {
     ASSERT_EQ_INT(y_out.size, y_out_expected.size);
     ASSERT_EQ_INT(y_out.size, blockDim.x);
 

@@ -3,13 +3,13 @@
 #include "stdio.h"
 
 
-void vector_init(vector_t *vector, u32 size) {
+void vector_init(device_vector_t *vector, u32 size) {
     cudaMalloc(&vector->vals, sizeof(f32) * size);
     vector->size = size;
 }
 
 
-void matrix_init(matrix_t *matrix, u32 height, u32 width) {
+void matrix_init(device_matrix_t *matrix, u32 height, u32 width) {
     cudaMalloc(&matrix->vals, sizeof(f32) * height * width);
     matrix->height = height;
     matrix->width = width;
@@ -17,38 +17,38 @@ void matrix_init(matrix_t *matrix, u32 height, u32 width) {
 }
 
 
-void vector_device_to_host(vector_t *host_vector, vector_t *device_vector) {
+void vector_device_to_host(host_vector_t *host_vector, device_vector_t *device_vector) {
     ASSERT_EQ_INT(host_vector->size, device_vector->size);
     int x = cudaMemcpy(host_vector->vals, device_vector->vals, sizeof(f32) * host_vector->size, cudaMemcpyDeviceToHost);
     ASSERT_EQ_INT(x, 0);
 }
 
-void vector_host_to_device(vector_t *device_vector, vector_t *host_vector) {
+void vector_host_to_device(device_vector_t *device_vector, host_vector_t *host_vector) {
     ASSERT_EQ_INT(host_vector->size, device_vector->size);
     int x = cudaMemcpy(device_vector->vals, host_vector->vals, sizeof(f32) * host_vector->size, cudaMemcpyHostToDevice);
     ASSERT_EQ_INT(x, 0);
 }
 
-static u64 matrix_copy_check(matrix_t *a, matrix_t *b) {
-    ASSERT_EQ_INT(a->height, b->height);
-    ASSERT_EQ_INT(a->stride, b->stride);
-    ASSERT_EQ_INT(a->width, b->width);
-    return sizeof(f32) * a->height * a->stride;
+static u64 matrix_copy_check(host_matrix_t *host_matrix, device_matrix_t *device_matrix) {
+    ASSERT_EQ_INT(host_matrix->height, device_matrix->height);
+    ASSERT_EQ_INT(host_matrix->stride, device_matrix->stride);
+    ASSERT_EQ_INT(host_matrix->width, device_matrix->width);
+    return sizeof(f32) * host_matrix->height * host_matrix->stride;
 }
 
-void matrix_device_to_host(matrix_t *host_matrix, matrix_t *device_matrix) {
+void matrix_device_to_host(host_matrix_t *host_matrix, device_matrix_t *device_matrix) {
     u64 num_bytes = matrix_copy_check(host_matrix, device_matrix);
     int x = cudaMemcpy(host_matrix->vals, device_matrix->vals, num_bytes, cudaMemcpyDeviceToHost);
     ASSERT_EQ_INT(x, 0);
 }
 
-void matrix_host_to_device(matrix_t *device_matrix, matrix_t *host_matrix) {
+void matrix_host_to_device(device_matrix_t *device_matrix, host_matrix_t *host_matrix) {
     u64 num_bytes = matrix_copy_check(host_matrix, device_matrix);
     int x = cudaMemcpy(device_matrix->vals, host_matrix->vals, num_bytes, cudaMemcpyHostToDevice);
     ASSERT_EQ_INT(x, 0);
 }
 
-__device__ void matrix_vector_multiply(matrix_t in_matrix, vector_t in_vector, vector_t out_vector) {
+__device__ void matrix_vector_multiply(device_matrix_t in_matrix, device_vector_t in_vector, device_vector_t out_vector) {
     ASSERT_EQ_INT(in_matrix.width, in_vector.size);
     ASSERT_EQ_INT(in_matrix.height, out_vector.size);
     ASSERT_EQ_INT(out_vector.size, blockDim.x);
@@ -66,7 +66,7 @@ __device__ void matrix_vector_multiply(matrix_t in_matrix, vector_t in_vector, v
 }
 
 // TODO: Optimize
-__device__ f32 vector_dot(vector_t a, vector_t b) {
+__device__ f32 vector_dot(device_vector_t a, device_vector_t b) {
     ASSERT_EQ_INT(a.size, b.size);
     f32 sum = 0;
     for (u32 i = 0; i != a.size; i++) {

@@ -13,11 +13,11 @@ void layer_init(layer_t *layer, u32 in_dimension, u32 out_dimension, activation_
 }
 
 
-__global__ void layer_compute(layer_t layer, vector_t in_vector, vector_t out_vector) {
+__global__ void layer_compute(layer_t layer, device_vector_t in_vector, device_vector_t out_vector) {
     ASSERT_EQ_INT(layer.in_dimension, in_vector.size);
     ASSERT_EQ_INT(layer.out_dimension, out_vector.size);
-    matrix_t weights = layer.weights;
-    vector_t bias = layer.bias;
+    device_matrix_t weights = layer.weights;
+    device_vector_t bias = layer.bias;
 
     // out_vector = weights * in_vector + bias
     matrix_vector_multiply(weights, in_vector, out_vector);
@@ -27,7 +27,7 @@ __global__ void layer_compute(layer_t layer, vector_t in_vector, vector_t out_ve
 }
 
 
-__global__ void compute_v_gradient_from_v_plus_gradient(vector_t v_gradient, vector_t v_plus_gradient, matrix_t w_plus, vector_t y, activation_func_t activation_func) {
+__global__ void compute_v_gradient_from_v_plus_gradient(device_vector_t v_gradient, device_vector_t v_plus_gradient, device_matrix_t w_plus, device_vector_t y, activation_func_t activation_func) {
     // Compute dJ / dy(r)
     u32 k = threadIdx.x;
     f32 y_k_derivarive = 0;
@@ -44,7 +44,7 @@ __global__ void compute_v_gradient_from_v_plus_gradient(vector_t v_gradient, vec
 }
 
 
-__global__ void compute_output_layer_v_gradient(vector_t y_out, vector_t y_out_expected, vector_t v_out_gradient, activation_func_t activation_func, cost_func_t cost_func) {
+__global__ void compute_output_layer_v_gradient(device_vector_t y_out, device_vector_t y_out_expected, device_vector_t v_out_gradient, activation_func_t activation_func, cost_func_t cost_func) {
     u32 k = threadIdx.x;
 
     // Compute gradient of y_out
@@ -61,7 +61,7 @@ __global__ void compute_output_layer_v_gradient(vector_t y_out, vector_t y_out_e
 // Call with
 // gridDim.x = layer.out_dim
 // blockDim.x = layer.in_dim
-__global__ void compute_weight_gradient(matrix_t w_derivative_out, vector_t v_gradient, vector_t y_minus) {
+__global__ void compute_weight_gradient(device_matrix_t w_derivative_out, device_vector_t v_gradient, device_vector_t y_minus) {
     u32 i = blockIdx.x;
     u32 j = gridDim.x;
     f32 v_gradient_i = v_gradient.vals[i];
