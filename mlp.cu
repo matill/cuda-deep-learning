@@ -65,35 +65,71 @@ void mlp_builder_add_layer(mlp_builder_t *mlp_builder, u32 out_dimension, activa
 mlp_t mlp_builder_finalize(mlp_builder_t *mlp_builder) {
     ASSERT_NEQ_INT(mlp_builder->num_layers, 0);
 
-    // Alloc array of layer descriptors
-    mlp_t mlp = {
-        .num_layers = mlp_builder->num_layers,
-        .layers = (layer_t *) malloc(sizeof(layer_t) * mlp_builder->num_layers)
-    };
-    ASSERT_NOT_NULL(mlp.layers);
-
-    // Alloc continous device memory for weights and bias.
-    u32 num_floats = 0;
+    // Find total number of parameters in the mlp
+    u32 num_parameters = 0;
     for (u32 i = 0; i != mlp_builder->num_layers; i++) {
         layer_builder_t layer_builder = mlp_builder->layers[i];
-        num_floats += layer_builder.out_dimension * (layer_builder.in_dimension + 1);
+        num_parameters += layer_builder.out_dimension * (layer_builder.in_dimension + 1);
     }
 
-    f32 *param_buffer;
-    cudaMalloc(&param_buffer, sizeof(f32) * num_floats);
-    ASSERT_NOT_NULL(param_buffer);
+    // Alloc memory for all parameters in the mlp (weights and bias)
+    f32 *all_parameters;
+    cudaMalloc(&all_parameters, sizeof(f32) * num_parameters);
+    ASSERT_NOT_NULL(all_parameters);
 
     // Initialize layers
-    for (u32 i = 0; i != mlp.num_layers; i++) {
-        layer_builder_t *layer_builder = &mlp_builder->layers[i];
-        layer_t *layer = &mlp.layers[i];
-        layer_init(layer, layer_builder, &param_buffer);
+    f32 *parameter_data_iter = all_parameters;
+    layer_t *layers = (layer_t *) malloc(sizeof(layer_t) * mlp_builder->num_layers);
+    ASSERT_NOT_NULL(layers);
+    for (u32 i = 0; i != mlp_builder->num_layers; i++) {
+        layer_init(&layers[i], &mlp_builder->layers[i], &parameter_data_iter);
     }
 
+    // Return as struct
+    mlp_t mlp = {
+        .num_layers = mlp_builder->num_layers,
+        .layers = layers,
+        .num_parameters = num_parameters,
+        .all_parameters = all_parameters
+    };
     return mlp;
 }
 
 
+mlp_gradient_compute_data_t mlp_alloc_gradient_compute_data(mlp_t mlp) {
+
+    // Alloc continous device memory for gradient of weights and bias
+    f32 *all_parameters;
+    cudaMalloc(&all_parameters, sizeof(f32) * mlp.num_parameters);
+    ASSERT_NOT_NULL(all_parameters);
+
+    // Initialize gradients
+    f32 *parameter_data_iter = all_parameters;
+    layer_params_t *gradient = (layer_params_t *) malloc(sizeof(layer_params_t) * mlp.num_layers);
+    ASSERT_NOT_NULL(gradient)
+    for (u32 i = 0; i != mlp.num_layers; i++) {
+        layer_t *layer = &mlp.layers[i];
+        u32 height = layer->out_dimension;
+        u32 width = layer->in_dimension;
+        matrix_init_from_buf(&gradient[i].weights, height, width, &parameter_data_iter);
+        vector_init_from_buf(&gradient[i].bias, height, &parameter_data_iter);
+    }
+
+    // Alloc data for layer outputs
+    device_vector_t *layer_outputs = (device_vector_t *) malloc(sizeof(device_vector_t) * mlp.num_layers);
+    ASSERT_NOT_NULL(layer_outputs);
+    for (u32 i = 0; i != mlp.num_layers; i++) {
+        device_vector_t *vector = &layer_outputs[i];
+        vector_init(vector, mlp.layers[i].out_dimension);
+    }
+
+    mlp_gradient_compute_data_t result = {
+        .gradient = gradient,
+        .layer_outputs = layer_outputs,
+        .all_parameters = all_parameters
+    };
+    return result;
+}
 
 
 int main() {
