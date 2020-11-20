@@ -1,3 +1,9 @@
+#include "mlp.h"
+#include "linalg.h"
+#include "layer.h"
+#include "common.h"
+#include <stdio.h>
+
 
 void network_compute(mlp_t *mlp, device_vector_t *layer_outputs, device_vector_t *in_vector) {
     // Compute output of each layer
