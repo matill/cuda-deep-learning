@@ -24,6 +24,7 @@ typedef struct layer_builder {
     u32 in_dimension;
     u32 out_dimension;
     activation_func_t activation_func;
+    f32 rand_range;
 } layer_builder_t;
 
 

@@ -25,13 +25,14 @@ mlp_builder_t mlp_builder_create(u32 in_dimension) {
 }
 
 
-void mlp_builder_add_layer(mlp_builder_t *mlp_builder, u32 out_dimension, activation_func_t activation_func) {
+void mlp_builder_add_layer(mlp_builder_t *mlp_builder, u32 out_dimension, activation_func_t activation_func, f32 rand_range) {
     u32 num_layers = mlp_builder->num_layers;
     u32 in_dimension = num_layers == 0 ? mlp_builder->in_dimension : mlp_builder->layers[num_layers-1].out_dimension;
     layer_builder_t layer_builder = {
         .in_dimension = in_dimension,
         .out_dimension = out_dimension,
-        .activation_func = activation_func
+        .activation_func = activation_func,
+        .rand_range = rand_range
     };
 
     mlp_builder->layers[mlp_builder->num_layers++] = layer_builder;
@@ -58,7 +59,12 @@ mlp_t mlp_builder_finalize(mlp_builder_t *mlp_builder) {
     layer_t *layers = (layer_t *) malloc(sizeof(layer_t) * mlp_builder->num_layers);
     ASSERT_NOT_NULL(layers);
     for (u32 i = 0; i != mlp_builder->num_layers; i++) {
-        layer_init(&layers[i], &mlp_builder->layers[i], &parameter_data_iter);
+        layer_t *layer = &layers[i];
+        layer_builder_t *layer_builder = &mlp_builder->layers[i];
+        f32 rand_range = layer_builder->rand_range;
+        layer_init(layer, layer_builder, &parameter_data_iter);
+        vector_set_rand_unif_vals(&layer->params.bias, -rand_range, rand_range);
+        matrix_set_rand_unif_vals(&layer->params.weights, -rand_range, rand_range);
     }
 
     // Return as struct
