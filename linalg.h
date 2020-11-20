@@ -38,6 +38,10 @@ void matrix_init(device_matrix_t *matrix, u32 height, u32 width);
 void vector_init_from_buf(device_vector_t *vector, u32 size, f32 **buf);
 void matrix_init_from_buf(device_matrix_t *matrix, u32 height, u32 width, f32 **buf);
 
+// Data initializers
+void vector_set_rand_unif_vals(device_vector_t *vector, f32 unif_low, f32 unif_high);
+void matrix_set_rand_unif_vals(device_matrix_t *matrix, f32 unif_low, f32 unif_high);
+
 // Copy functions
 void vector_device_to_host(host_vector_t *host_vector, device_vector_t *device_vector);
 void vector_host_to_device(device_vector_t *device_vector, host_vector_t *host_vector);

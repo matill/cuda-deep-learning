@@ -1,8 +1,10 @@
 #include "linalg.h"
 #include "common.h"
 #include "stdio.h"
+#include <random>
 
 
+// Constructors
 void vector_init(device_vector_t *vector, u32 size) {
     cudaMalloc(&vector->vals, sizeof(f32) * size);
     vector->size = size;
@@ -28,6 +30,38 @@ void matrix_init_from_buf(device_matrix_t *matrix, u32 height, u32 width, f32 **
     matrix->height = height;
     matrix->width = width;
     matrix->stride = width;
+}
+
+
+// Data initializers
+static f32 *generate_rand_unif_array(u32 num_vals, f32 unif_low, f32 unif_high) {
+    std::default_random_engine generator;
+    std::uniform_real_distribution<f32> distribution(unif_low, unif_high);
+    f32 *data = (f32 *) malloc(sizeof(f32) * num_vals);
+    ASSERT_NOT_NULL(data);
+    for (u32 i = 0; i != num_vals; i++) {
+        data[i] = distribution(generator);
+    }
+
+    return data;
+}
+
+void vector_set_rand_unif_vals(device_vector_t *vector, f32 unif_low, f32 unif_high) {
+    f32 *data = generate_rand_unif_array(vector->size, unif_low, unif_high);
+    i32 x = cudaMemcpy(vector->vals, data, vector->size * sizeof(f32), cudaMemcpyHostToDevice);
+    free(data);
+    ASSERT_EQ_INT(x, 0);
+}
+
+
+// NOTE: Only works with matrices with equal stride and width (which is most often the case)
+void matrix_set_rand_unif_vals(device_matrix_t *matrix, f32 unif_low, f32 unif_high) {
+    ASSERT_EQ_INT(matrix->width, matrix->stride);
+    u32 size = matrix->height * matrix->width;
+    f32 *data = generate_rand_unif_array(size, unif_low, unif_high);
+    i32 x = cudaMemcpy(matrix->vals, data, size * sizeof(f32), cudaMemcpyHostToDevice);
+    free(data);
+    ASSERT_EQ_INT(x, 0);
 }
 
 
