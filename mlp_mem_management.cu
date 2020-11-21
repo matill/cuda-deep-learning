@@ -51,7 +51,8 @@ mlp_t mlp_builder_finalize(mlp_builder_t *mlp_builder) {
 
     // Alloc memory for all parameters in the mlp (weights and bias)
     f32 *all_parameters;
-    cudaMalloc(&all_parameters, sizeof(f32) * num_parameters);
+    u32 x = cudaMalloc(&all_parameters, sizeof(f32) * num_parameters);
+    ASSERT_EQ(x, 0);
     ASSERT_NOT_NULL(all_parameters);
 
     // Initialize layers
@@ -114,81 +115,3 @@ mlp_gradient_compute_data_t mlp_alloc_gradient_compute_data(mlp_t mlp) {
     return result;
 }
 
-
-int main() {
-
-    // // Values in layers
-    // f32 layer_0_bias_raw[5] = {
-    //     -2, -1, 0, 1, 2
-    // };
-    // f32 layer_1_bias_raw[3] = {
-    //     2, 2, 2
-    // };
-    // host_vector_t layer_0_bias = {
-    //     .size = 5,
-    //     .vals = layer_0_bias_raw
-    // };
-    // host_vector_t layer_1_bias = {
-    //     .size = 3,
-    //     .vals = layer_1_bias_raw
-    // };
-
-    // mlp_t mlp = {
-    //     .num_layers = 2,
-    //     .layers = (layer_t *) malloc(sizeof(layer_t) * 2),
-    // };
-
-    // // Create input vector and mlp
-    // device_vector_t input;
-    // vector_init(&input, 2);
-    // layer_init(&mlp.layers[0], 2, 5, SIGMOID);
-    // layer_init(&mlp.layers[1], 5, 3, SOFTMAX);
-    // device_vector_t *layer_outputs = alloc_layer_outputs(&mlp);
-
-    // // Move bias vectors into MLP layers
-    // vector_host_to_device(&mlp.layers[0].bias, &layer_0_bias);
-    // vector_host_to_device(&mlp.layers[1].bias, &layer_1_bias);
-
-    // // Compute
-    // network_compute(&mlp, layer_outputs, &input);
-
-    // // Alloc memory to get data from device
-    // host_vector_t host_layer_outputs[2] = {
-    //     {
-    //         .size = 5,
-    //         .vals = (f32 *) malloc(sizeof(f32) * 10)
-    //     },
-    //     {
-    //         .size = 3,
-    //         .vals = (f32 *) malloc(sizeof(f32) * 10)
-    //     }
-    // };
-
-    // for (i32 i = 0; i != 10; i++) {
-    //     host_layer_outputs[0].vals[i] = -2*i;
-    //     host_layer_outputs[1].vals[i] = -2*i;
-    // }
-
-    // vector_device_to_host(&host_layer_outputs[0], &layer_outputs[0]);
-    // for (i32 i = 0; i != 10; i++)
-    //     printf("layers 0 [%d] = %f\n", i, host_layer_outputs[0].vals[i]);
-
-    // vector_device_to_host(&host_layer_outputs[1], &layer_outputs[1]);
-    // for (i32 i = 0; i != 10; i++)
-    //     printf("layers 1 [%d] = %f\n", i, host_layer_outputs[1].vals[i]);
-
-
-}
-
-
-// __global__ void cross_entropy_derivative(device_vector_t *estimate, device_vector_t *truth, device_vector_t *derivative_out) {
-
-// }
-
-
-
-
-// __global__ void layer_
-
-
-// __global__ void layer_back_propagate_step(layer_t *layer, device_vector_t *y_self, device_vector_t *y_minus, )
