@@ -20,13 +20,15 @@ void matrix_init(device_matrix_t *matrix, u32 height, u32 width) {
 
 
 void vector_init_from_buf(device_vector_t *vector, u32 size, f32 **buf) {
-    vector->vals = (*buf += size);
+    vector->vals = *buf;
+    *buf += size;
     vector->size = size;
 }
 
 
 void matrix_init_from_buf(device_matrix_t *matrix, u32 height, u32 width, f32 **buf) {
-    matrix->vals = (*buf += (height * width));
+    matrix->vals = *buf;
+    *buf += height * width;
     matrix->height = height;
     matrix->width = width;
     matrix->stride = width;
