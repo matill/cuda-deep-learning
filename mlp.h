@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "layer.h"
+#include "linalg.h"
 #include "cost_func.h"
 
 

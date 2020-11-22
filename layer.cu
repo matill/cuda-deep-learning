@@ -1,7 +1,4 @@
 #include "layer.h"
-#include "common.h"
-#include "linalg.h"
-#include "cost_func.h"
 
 
 void layer_init(layer_t *layer, layer_builder_t *layer_builder, f32 **param_buffer) {
@@ -29,7 +26,11 @@ __global__ void layer_compute(layer_t layer, device_vector_t in_vector, device_v
 }
 
 
-__global__ void compute_v_gradient_from_v_plus_gradient(device_vector_t v_gradient, device_vector_t v_plus_gradient, device_matrix_t w_plus, device_vector_t y, activation_func_t activation_func) {
+
+__global__ void compute_v_gradient_from_v_plus_gradient(device_vector_t v_gradient,
+    device_vector_t v_plus_gradient, device_matrix_t w_plus, device_vector_t y,
+    activation_func_t activation_func) {
+
     // Compute dJ / dy(r)
     u32 k = threadIdx.x;
     f32 y_k_derivarive = 0;
@@ -46,7 +47,10 @@ __global__ void compute_v_gradient_from_v_plus_gradient(device_vector_t v_gradie
 }
 
 
-__global__ void compute_output_layer_v_gradient(device_vector_t y_out, device_vector_t y_out_expected, device_vector_t v_out_gradient, activation_func_t activation_func, cost_func_t cost_func) {
+__global__ void compute_output_layer_v_gradient(device_vector_t y_out,
+    device_vector_t y_out_expected, device_vector_t v_out_gradient,
+    activation_func_t activation_func, cost_func_t cost_func) {
+
     u32 k = threadIdx.x;
 
     // Compute gradient of y_out
@@ -60,10 +64,10 @@ __global__ void compute_output_layer_v_gradient(device_vector_t y_out, device_ve
 }
 
 
-// Call with
-// gridDim.x = layer.out_dim
-// blockDim.x = layer.in_dim
-__global__ void compute_weight_gradient(device_matrix_t w_derivative_out, device_vector_t v_gradient, device_vector_t y_minus) {
+// Call with <<<layer.out_dim, layer.in_dim>>>
+__global__ void compute_weight_gradient(device_matrix_t w_derivative_out,
+    device_vector_t v_gradient, device_vector_t y_minus) {
+
     u32 i = blockIdx.x;
     u32 j = gridDim.x;
     f32 v_gradient_i = v_gradient.vals[i];
