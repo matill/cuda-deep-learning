@@ -28,6 +28,7 @@ typedef struct mlp_gradient_compute_data {
     f32 *all_parameters;
 } mlp_gradient_compute_data_t;
 
+
 // mlp_trainer_t contains a multilayer perceptron, and the datastructures/memory
 // that the mlp needs to perform gradient descent updates.
 typedef struct mlp_trainer {
@@ -36,12 +37,14 @@ typedef struct mlp_trainer {
 } mlp_trainer_t;
 
 
+// Execution API
 void network_compute(mlp_t *mlp, device_vector_t *layer_outputs, device_vector_t *in_vector);
 
+
+// Constructors and memory management API
 mlp_builder_t mlp_builder_create(u32 in_dimension);
 void mlp_builder_add_layer(mlp_builder_t *mlp_builder, u32 out_dimension, activation_func_t activation_func, f32 rand_range);
 mlp_t mlp_builder_finalize(mlp_builder_t *mlp_builder);
-
 mlp_gradient_compute_data_t mlp_alloc_gradient_compute_data(mlp_t mlp);
 
 #endif

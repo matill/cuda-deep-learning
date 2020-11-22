@@ -48,6 +48,7 @@ static f32 *generate_rand_unif_array(u32 num_vals, f32 unif_low, f32 unif_high) 
     return data;
 }
 
+
 void vector_set_rand_unif_vals(device_vector_t *vector, f32 unif_low, f32 unif_high) {
     f32 *data = generate_rand_unif_array(vector->size, unif_low, unif_high);
     i32 x = cudaMemcpy(vector->vals, data, vector->size * sizeof(f32), cudaMemcpyHostToDevice);
@@ -73,11 +74,13 @@ void vector_device_to_host(host_vector_t *host_vector, device_vector_t *device_v
     ASSERT_EQ_INT(x, 0);
 }
 
+
 void vector_host_to_device(device_vector_t *device_vector, host_vector_t *host_vector) {
     ASSERT_EQ_INT(host_vector->size, device_vector->size);
     int x = cudaMemcpy(device_vector->vals, host_vector->vals, sizeof(f32) * host_vector->size, cudaMemcpyHostToDevice);
     ASSERT_EQ_INT(x, 0);
 }
+
 
 static u64 matrix_copy_check(host_matrix_t *host_matrix, device_matrix_t *device_matrix) {
     ASSERT_EQ_INT(host_matrix->height, device_matrix->height);
@@ -86,17 +89,20 @@ static u64 matrix_copy_check(host_matrix_t *host_matrix, device_matrix_t *device
     return sizeof(f32) * host_matrix->height * host_matrix->stride;
 }
 
+
 void matrix_device_to_host(host_matrix_t *host_matrix, device_matrix_t *device_matrix) {
     u64 num_bytes = matrix_copy_check(host_matrix, device_matrix);
     int x = cudaMemcpy(host_matrix->vals, device_matrix->vals, num_bytes, cudaMemcpyDeviceToHost);
     ASSERT_EQ_INT(x, 0);
 }
 
+
 void matrix_host_to_device(device_matrix_t *device_matrix, host_matrix_t *host_matrix) {
     u64 num_bytes = matrix_copy_check(host_matrix, device_matrix);
     int x = cudaMemcpy(device_matrix->vals, host_matrix->vals, num_bytes, cudaMemcpyHostToDevice);
     ASSERT_EQ_INT(x, 0);
 }
+
 
 __device__ void matrix_vector_multiply(device_matrix_t in_matrix, device_vector_t in_vector, device_vector_t out_vector) {
     ASSERT_EQ_INT(in_matrix.width, in_vector.size);
@@ -115,6 +121,7 @@ __device__ void matrix_vector_multiply(device_matrix_t in_matrix, device_vector_
     out_vector.vals[threadIdx.x] = thread_val;
 }
 
+
 // TODO: Optimize
 __device__ f32 vector_dot(device_vector_t a, device_vector_t b) {
     ASSERT_EQ_INT(a.size, b.size);
@@ -125,3 +132,4 @@ __device__ f32 vector_dot(device_vector_t a, device_vector_t b) {
 
     return sum;
 }
+

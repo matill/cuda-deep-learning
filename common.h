@@ -20,15 +20,18 @@ typedef double f64;
 #define MIN(a, b) \
     ((a) < (b) ? (a) : (b))
 
+
 #define ASSERT_NOT_NULL(pointer) \
     if (!((pointer) != NULL)) { \
         printf("Assertion error %s:%d. %s is NULL\n", __FILE__, __LINE__, #pointer); \
     }
 
+
 #define ASSERT_EQ_INT(a, b) \
     if ((a) != (b)) { \
         printf("Assertion error %s:%d. %s (%d) != %s (%d)\n", __FILE__, __LINE__, #a, (a), #b, (b)); \
     }
+
 
 #define ASSERT_NEQ_INT(a, b) \
     if ((a) == (b)) { \

@@ -5,3 +5,4 @@ CORE_IMPLEMENTATION=mlp_mem_management.cu mlp_execution.cu linalg.cu layer.cu co
 
 test: test.cu $(CORE_IMPLEMENTATION)
 	nvcc -rdc=true --run $^
+
