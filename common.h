@@ -17,8 +17,8 @@ typedef float f32;
 typedef double f64;
 
 
-#define ASSERT_FMT(p, callback)
-
+#define MIN(a, b) \
+    ((a) < (b) ? (a) : (b))
 
 #define ASSERT_NOT_NULL(pointer) \
     if (!((pointer) != NULL)) { \
