@@ -10,3 +10,6 @@ test: test.cu $(CORE_IMPLEMENTATION)
 test_csv: csv.cu
 	nvcc -rdc=true --run $^
 
+
+test_operational: main.cu $(CORE_IMPLEMENTATION)
+	nvcc -rdc=true --run $^

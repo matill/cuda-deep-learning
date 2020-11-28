@@ -109,6 +109,27 @@ f32 *csv_parser_next_alloc(csv_parser_t *parser) {
 }
 
 
+f32 **csv_parser_collect(csv_parser_t *parser, u32 *num_items_out) {
+    u32 num_rows = 0, cap = 20;
+    f32 **matrix = (f32 **) malloc(sizeof(f32 *) * cap);
+    ASSERT_NOT_NULL(matrix)
+
+    f32 *vector;
+    while ((vector = csv_parser_next_alloc(parser)) != NULL) {
+        if (num_rows == cap) {
+            cap *= 2;
+            matrix = (f32 **) realloc(matrix, sizeof(f32) * cap);
+            ASSERT_NOT_NULL(matrix);
+        }
+
+        matrix[num_rows++] = vector;
+    }
+
+    *num_items_out = num_rows;
+    return matrix;
+}
+
+
 #define ASSERT_NEXT_OK(out_buf, expected) assert_next_ok(out_buf, expected, &parser, __LINE__);
 
 
@@ -129,6 +150,7 @@ void assert_next_ok(f32 *out_buf, f32 *expected, csv_parser_t *parser, u32 line)
 }
 
 
+#ifdef TEST_CSV
 int main() {
     // Test ends with EOF
     f32 test_case_data[3][4] = {
@@ -166,3 +188,4 @@ int main() {
     ASSERT_NEXT_OK(test_case_out, test_case_data2[7])
     ASSERT_EQ(csv_parser_next_into(&parser, NULL), END)
 }
+#endif
