@@ -16,3 +16,6 @@ test_operational: main.cu $(CORE_IMPLEMENTATION)
 
 simple_gradient_compute_check: simple_gradient_compute_check.cu $(CORE_IMPLEMENTATION)
 	nvcc -rdc=true --run $^
+
+mnist_digits: mnist_digits.cu $(CORE_IMPLEMENTATION)
+	nvcc -rdc=true --run $^
