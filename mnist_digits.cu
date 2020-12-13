@@ -11,6 +11,20 @@ void encode_one_hot(f32 *arr, u32 size, u32 label) {
     arr[label] = 1.0;
 }
 
+u32 decode_one_hot(host_vector_t vector) {
+    u32 highest_index = 0;
+    f32 highest_val = vector.vals[0];
+    for (u32 i = 1; i != vector.size; i++) {
+        f32 crt_val = vector.vals[i];
+        if (crt_val > highest_val) {
+            highest_val = crt_val;
+            highest_index = i;
+        }
+    }
+
+    return highest_index;
+}
+
 
 int main() {
 
@@ -32,8 +46,8 @@ int main() {
     vector_init(&device_output, 10);
 
     // Train MLP
-    for (u32 epoch = 0; epoch != 2; epoch++) {
-        f32 step_size = -0.001f;
+    for (u32 epoch = 0; epoch != 3; epoch++) {
+        f32 step_size = -0.00001f;
         printf("epoch %d, step_size: %f\n", epoch, step_size);
         for (u32 i = 0; i != num_vecs; i++) {
             if (i % 500 == 0) {
@@ -57,8 +71,15 @@ int main() {
         }
     }
 
-    // Print output of the first 100 vectors
-    for (u32 i = 0; i != 100; i++) {
+    // Compute confusion matrix
+    u32 confusion_matrix[10][10];
+    for (u32 i = 0; i != 10; i++) {
+        for (u32 j = 0; j != 10; j++) {
+            confusion_matrix[i][j] = 0;
+        }
+    }
+
+    for (u32 i = 0; i != num_vecs; i++) {
         // Compute output from input
         f32 *row = rows[i];
         host_vector_t input = {
@@ -68,9 +89,42 @@ int main() {
         vector_host_to_device(&device_input, &input);
         network_compute(mlp, gradient.layer_outputs, device_input);
 
+        // Copy output to host memory
+        f32 output_data[10];
+        host_vector_t host_output = host_vector_init_static(10, output_data);
+        device_vector_t device_output = gradient.layer_outputs[mlp.num_layers-1];
+        vector_device_to_host(&host_output, &device_output);
+        u32 output_decoded = decode_one_hot(host_output);
+
+        // Increment confusion matrix
+        u32 real_label = (u32) row[0];
+        confusion_matrix[real_label][output_decoded]++;
+
         // Print output
-        printf("\nExpected output %d\n", (i32) row[0]);
-        host_print_vector(gradient.layer_outputs[1], (char *) "output");
+        // printf("\nExpected output %d\n", (i32) row[0]);
+        // host_print_vector(gradient.layer_outputs[1], (char *) "output");
     }
+
+    // Print confusion matrix
+    printf("Confusion matrix\n");
+    for (u32 i = 0; i != 10; i++) {
+        printf("[");
+        for (u32 j = 0; j != 10; j++) {
+            printf("%d", confusion_matrix[i][j]);
+            if (j == 9) {
+                printf("]\n");
+            } else {
+                printf("\t");
+            }
+        }
+    }
+
+    // Print classification accuracy
+    u32 num_correct = 0;
+    for (u32 i = 0; i != 10; i++) {
+        num_correct += confusion_matrix[i][i];
+    }
+    f32 accuracy = ((f32) num_correct) / ((f32) num_vecs);
+    printf("\nCorrectly classified %d / %d. Accuracy: %f\n", num_correct, num_vecs, accuracy);
 }
 
