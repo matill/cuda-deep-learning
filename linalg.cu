@@ -55,6 +55,29 @@ host_vector_t host_vector_alloc(u32 size) {
 }
 
 
+host_matrix_t host_matrix_init_static(u32 height, u32 width, f32 *buf) {
+    host_matrix_t matrix = {
+        .width = width,
+        .height = height,
+        .stride = width,
+        .vals = buf
+    };
+    return matrix;
+}
+
+
+host_matrix_t host_matrix_alloc(u32 height, u32 width) {
+    host_matrix_t matrix = {
+        .width = width,
+        .height = height,
+        .stride = width,
+        .vals = (f32 *) malloc(sizeof(f32) * height * width)
+    };
+    ASSERT_NOT_NULL(matrix.vals)
+    return matrix;
+}
+
+
 // Data initializers
 static f32 *generate_rand_unif_array(u32 num_vals, f32 unif_low, f32 unif_high) {
     std::default_random_engine generator;
