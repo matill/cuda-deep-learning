@@ -16,6 +16,7 @@ inline __device__ void apply_softmax(device_vector_t vector) {
     for (u32 i = 0; i != vector.size; i++) {
         sum += vector.vals[i];
     }
+    __syncthreads();
     *val /= sum;
 }
 
