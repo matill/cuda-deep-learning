@@ -26,6 +26,7 @@ int main() {
     vector_init(&device_input, 2);
     vector_init(&device_output, 1);
 
+    // Train MLP
     for (u32 epoch = 0; epoch != 10; epoch++) {
         for (u32 i = 0; i != num_vecs; i++) {
             f32 *row = rows[i];
@@ -47,6 +48,31 @@ int main() {
 
             printf("epoch: %d. i: %d\n", epoch, i);
         }
+    }
+
+    // Print output of MLP
+    for (u32 i = 0; i != num_vecs; i++) {
+
+        // Compute output from input
+        f32 *row = rows[i];
+        host_vector_t input = {
+            .size = 2,
+            .vals = &row[1]
+        };
+        vector_host_to_device(device_input, input);
+        network_compute(&mlp, gradient.layer_outputs, &input);
+
+        // Copy output to host memory
+        f32 output_data[2];
+        host_vector_t output = {
+            .size = 2,
+            .vals = output_data
+        };
+
+        vector_device_to_host(output, gradient.layer_outputs[0]);
+
+        // Print output
+        printf("output %d: [%.1f, %.1f]\n", output_data[0], output_data[1]);
     }
 }
 

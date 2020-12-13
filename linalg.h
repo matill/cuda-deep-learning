@@ -58,5 +58,7 @@ __device__ inline f32 *matrix_index(device_matrix_t matrix, u32 i, u32 j) {
 __device__ void matrix_vector_multiply(device_matrix_t in_matrix, device_vector_t in_vector, device_vector_t out_vector);
 __device__ f32 vector_dot(device_vector_t a, device_vector_t b);
 
+__device__ void print_matrix(device_matrix_t matrix, char *name);
+__device__ void print_vector(device_vector_t vector, char *name);
 
 #endif

@@ -133,3 +133,32 @@ __device__ f32 vector_dot(device_vector_t a, device_vector_t b) {
     return sum;
 }
 
+
+__device__ void print_matrix(device_matrix_t matrix, char *name) {
+    if (threadIdx.x == 0) {
+        printf("%s: (%d, %d):\n", name, matrix.height, matrix.width);
+        for (u32 i = 0; i != matrix.height; i++) {
+            printf("[");
+            for (u32 j = 0; j != matrix.width; j++) {
+                printf("%f (%p, %d, %d)", *matrix_index(matrix, i, j), matrix_index(matrix, i, j), i, j);
+                if (j == matrix.width - 1) {
+                    printf("]\n");
+                } else {
+                    printf(", ");
+                }
+            }
+        }
+    }
+}
+
+
+__device__ void print_vector(device_vector_t vector, char *name) {
+    if (threadIdx.x == 0) {
+        printf("%s: %d:\n", name, vector.size);
+        for (u32 i = 0; i != vector.size; i++) {
+            printf("[%f]\n", vector.vals[i]);
+        }
+    }
+}
+
+
