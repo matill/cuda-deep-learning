@@ -24,7 +24,7 @@ int main() {
     gradient = mlp_alloc_gradient_compute_data(mlp);
     device_vector_t device_input, device_output;
     vector_init(&device_input, 2);
-    vector_init(&device_output, 1);
+    vector_init(&device_output, 2);
 
     // Train MLP
     for (u32 epoch = 0; epoch != 10; epoch++) {
