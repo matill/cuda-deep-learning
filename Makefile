@@ -13,3 +13,6 @@ test_csv: csv.cu
 
 test_operational: main.cu $(CORE_IMPLEMENTATION)
 	nvcc -rdc=true --run $^
+
+simple_gradient_compute_check: simple_gradient_compute_check.cu $(CORE_IMPLEMENTATION)
+	nvcc -rdc=true --run $^
