@@ -293,7 +293,6 @@ void host_print_matrix(device_matrix_t matrix, char *name) {
     printf("%s: (%d, %d):\n", name, matrix.height, matrix.width);
     host_print_matrix_kernel<<<1, 1>>>(matrix);
     cudaDeviceSynchronize();
-    printf("hei\n");
 }
 
 

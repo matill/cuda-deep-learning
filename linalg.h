@@ -39,7 +39,7 @@ void vector_init_from_buf(device_vector_t *vector, u32 size, f32 **buf);
 void matrix_init_from_buf(device_matrix_t *matrix, u32 height, u32 width, f32 **buf);
 host_vector_t host_vector_init_static(u32 size, f32 *content);
 host_vector_t host_vector_alloc(u32 size);
-host_matrix_t host_matrix_init_static(u32 height, u32 width, f32 **buf);
+host_matrix_t host_matrix_init_static(u32 height, u32 width, f32 *buf);
 host_matrix_t host_matrix_alloc(u32 height, u32 width);
 
 
@@ -67,6 +67,12 @@ void assert_host_and_device_matrices_equal(host_matrix_t a, device_matrix_t b, c
         assert_host_and_device_vectors_equal(expected, (vector), (char *) __FILE__, __LINE__); \
     }
 
+#define ASSERT_DEVICE_MATRIX(matrix, height, width, ...) \
+    { \
+        f32 content_arr[(height) * (width)] = {__VA_ARGS__}; \
+        host_matrix_t expected = host_matrix_init_static((height), (width), content_arr); \
+        assert_host_and_device_matrices_equal(expected, (matrix), (char *) __FILE__, __LINE__); \
+    }
 
 __device__ inline f32 *matrix_index(device_matrix_t matrix, u32 i, u32 j) {
     return &matrix.vals[j + matrix.stride * i];
