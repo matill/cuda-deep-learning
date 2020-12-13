@@ -55,7 +55,24 @@ void matrix_device_to_host(host_matrix_t *host_matrix, device_matrix_t *device_m
 void matrix_host_to_device(device_matrix_t *device_matrix, host_matrix_t *host_matrix);
 
 
+// Assertion functions
+void assert_host_vectors_equal(host_vector_t a, host_vector_t b, char *file, u32 line);
+void assert_host_matrices_equal(host_matrix_t a, host_matrix_t b, char *file, u32 line);
+void assert_host_and_device_vectors_equal(host_vector_t a, device_vector_t b, char *file, u32 line);
+void assert_host_and_device_matrices_equal(host_matrix_t a, device_matrix_t b, char *file, u32 line);
+#define ASSERT_DEVICE_VECTOR(vector, s, ...) \
+    { \
+        f32 content_arr[s] = {__VA_ARGS__}; \
+        host_vector_t expected = host_vector_init_static((s), content_arr); \
+        assert_host_and_device_vectors_equal(expected, (vector), (char *) __FILE__, __LINE__); \
+    }
+
+
 __device__ inline f32 *matrix_index(device_matrix_t matrix, u32 i, u32 j) {
+    return &matrix.vals[j + matrix.stride * i];
+}
+
+inline f32 *host_matrix_index(host_matrix_t matrix, u32 i, u32 j) {
     return &matrix.vals[j + matrix.stride * i];
 }
 

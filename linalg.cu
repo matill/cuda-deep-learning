@@ -147,6 +147,72 @@ void matrix_host_to_device(device_matrix_t *device_matrix, host_matrix_t *host_m
 }
 
 
+u32 float_eq(f32 a, f32 b) {
+    const f32 accuracy = 0.0001;
+    f32 diff = a - b;
+    return -accuracy < diff && diff < accuracy;
+} 
+
+
+// Assertion functions
+void assert_host_vectors_equal(host_vector_t a, host_vector_t b, char *file, u32 line) {
+    if (a.size != b.size) {
+        printf("Assertion error %s:%d. Incompatible shapes. %d != %d\n", file, line, a.size, b.size);
+        exit(-1);
+    }
+
+    u32 num_errors = 0;
+    for (u32 i = 0; i != a.size; i++) {
+        if (!float_eq(a.vals[i], b.vals[i])) {
+            printf("Assertion error %s:%d. In element %d: %f != %f\n", file, line, i, a.vals[i], b.vals[i]);
+            num_errors++;
+        }
+    }
+
+    if (num_errors > 0) {
+        exit(-1);
+    }
+}
+
+
+void assert_host_matrices_equal(host_matrix_t a, host_matrix_t b, char *file, u32 line) {
+    if (a.height != b.height || a.width != b.width) {
+        printf("Assertion error %s:%d. Incompatible shapes. (%d, %d) != (%d, %d)\n", file, line, a.height, a.width, b.height, b.width);
+        exit(-1);
+    }
+
+    u32 num_errors = 0;
+    for (u32 i = 0; i != a.height; i++) {
+        for (u32 j = 0; j != a.width; j++) {
+            f32 a_ij = *host_matrix_index(a, i, j);
+            f32 b_ij = *host_matrix_index(b, i, j);
+            if (!float_eq(a_ij, b_ij)) {
+                printf("Assertion error %s:%d. In element (%d, %d): %f != %f\n", file, line, i, j, a_ij, b_ij);
+                num_errors++;
+            }
+        }
+    }
+
+    if (num_errors > 0) {
+        exit(-1);
+    }
+}
+
+
+void assert_host_and_device_vectors_equal(host_vector_t a, device_vector_t b, char *file, u32 line) {
+    host_vector_t b_host = host_vector_alloc(b.size);
+    vector_device_to_host(&b_host, &b);
+    assert_host_vectors_equal(a, b_host, file, line);
+}
+
+
+void assert_host_and_device_matrices_equal(host_matrix_t a, device_matrix_t b, char *file, u32 line) {
+    host_matrix_t b_host = host_matrix_alloc(b.height, b.width);
+    matrix_device_to_host(&b_host, &b);
+    assert_host_matrices_equal(a, b_host, file, line);
+}
+
+
 __device__ void matrix_vector_multiply(device_matrix_t in_matrix, device_vector_t in_vector, device_vector_t out_vector) {
     ASSERT_EQ_INT(in_matrix.width, in_vector.size);
     ASSERT_EQ_INT(in_matrix.height, out_vector.size);
