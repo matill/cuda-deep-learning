@@ -20,7 +20,7 @@ __global__ void layer_compute(layer_t layer, device_vector_t in_vector, device_v
 
     // out_vector = weights * in_vector + bias
     matrix_vector_multiply(weights, in_vector, out_vector);
-    out_vector.vals[threadIdx.x] += bias.vals[threadIdx.x];
+    out_vector.vals[k] += bias.vals[k];
 
     apply_activation_func(out_vector, layer.activation_func);
 }
@@ -73,5 +73,6 @@ __global__ void compute_weight_gradient(device_matrix_t w_derivative_out,
 
     f32 v_gradient_i = v_gradient.vals[i];
     f32 y_minus_j = y_minus.vals[j];
-    *matrix_index(w_derivative_out, i, j) = v_gradient_i * y_minus_j;
+    f32 *out = matrix_index(w_derivative_out, i, j);
+    *out = v_gradient_i * y_minus_j;
 }
