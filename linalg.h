@@ -37,6 +37,9 @@ void vector_init(device_vector_t *vector, u32 size);
 void matrix_init(device_matrix_t *matrix, u32 height, u32 width);
 void vector_init_from_buf(device_vector_t *vector, u32 size, f32 **buf);
 void matrix_init_from_buf(device_matrix_t *matrix, u32 height, u32 width, f32 **buf);
+host_vector_t host_vector_init_static(u32 size, f32 *content);
+host_vector_t host_vector_alloc(u32 size);
+// void matrix_init_static(device_matrix_t *matrix, u32 height, u32 width, f32 **buf);
 
 
 // Data initializers

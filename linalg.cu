@@ -36,6 +36,25 @@ void matrix_init_from_buf(device_matrix_t *matrix, u32 height, u32 width, f32 **
 }
 
 
+host_vector_t host_vector_init_static(u32 size, f32 *content) {
+    host_vector_t vector = {
+        .size = size,
+        .vals = content
+    };
+    return vector;
+}
+
+
+host_vector_t host_vector_alloc(u32 size) {
+    host_vector_t vector = {
+        .size = size,
+        .vals = (f32 *) malloc(sizeof(f32) * size)
+    };
+    ASSERT_NOT_NULL(vector.vals);
+    return vector;
+}
+
+
 // Data initializers
 static f32 *generate_rand_unif_array(u32 num_vals, f32 unif_low, f32 unif_high) {
     std::default_random_engine generator;
