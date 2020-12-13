@@ -69,7 +69,8 @@ __global__ void compute_weight_gradient(device_matrix_t w_derivative_out,
     device_vector_t v_gradient, device_vector_t y_minus) {
 
     u32 i = blockIdx.x;
-    u32 j = gridDim.x;
+    u32 j = threadIdx.x;
+
     f32 v_gradient_i = v_gradient.vals[i];
     f32 y_minus_j = y_minus.vals[j];
     *matrix_index(w_derivative_out, i, j) = v_gradient_i * y_minus_j;
