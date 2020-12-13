@@ -41,7 +41,7 @@ __device__ f32 transform_yk_derivative_to_vk_derivative(device_vector_t y, f32 y
     f32 sigma_c;
     switch (activation_func) {
         case SIGMOID:
-            return y_k * (y_k - 1) * y_k_derivative;
+            return y_k * (1 - y_k) * y_k_derivative;
 
         case SOFTMAX:
             // Temporarily store all y_k_derivative in shared memory to compute sigma_c.
