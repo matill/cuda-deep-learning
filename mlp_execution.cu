@@ -95,6 +95,7 @@ void gradient_descent_update_device_vectors(mlp_t mlp, mlp_gradient_compute_data
     }
     update_params<<<num_blocks, num_threads>>>(mlp.all_parameters, gradient_compute_data.all_parameters,
             step_size, num_params);
+    cudaDeviceSynchronize();
 }
 
 
