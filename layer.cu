@@ -17,6 +17,7 @@ __global__ void layer_compute(layer_t layer, device_vector_t in_vector, device_v
     ASSERT_EQ_INT(layer.out_dimension, out_vector.size);
     device_matrix_t weights = layer.params.weights;
     device_vector_t bias = layer.params.bias;
+    u32 k = threadIdx.x;
 
     // out_vector = weights * in_vector + bias
     matrix_vector_multiply(weights, in_vector, out_vector);
