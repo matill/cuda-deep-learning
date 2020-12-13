@@ -1,6 +1,7 @@
 #include "linalg.h"
 #include "common.h"
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <random>
 
 
@@ -134,20 +135,32 @@ __device__ f32 vector_dot(device_vector_t a, device_vector_t b) {
 }
 
 
+__device__ void print_matrix_core(device_matrix_t matrix) {
+    for (u32 i = 0; i != matrix.height; i++) {
+        printf("[");
+        for (u32 j = 0; j != matrix.width; j++) {
+            printf("%f", *matrix_index(matrix, i, j));
+            if (j == matrix.width - 1) {
+                printf("]\n");
+            } else {
+                printf("\t");
+            }
+        }
+    }
+}
+
+
+__device__ void print_vector_core(device_vector_t vector) {
+    for (u32 i = 0; i != vector.size; i++) {
+        printf("[%f]\n", vector.vals[i]);
+    }
+}
+
+
 __device__ void print_matrix(device_matrix_t matrix, char *name) {
     if (threadIdx.x == 0) {
         printf("%s: (%d, %d):\n", name, matrix.height, matrix.width);
-        for (u32 i = 0; i != matrix.height; i++) {
-            printf("[");
-            for (u32 j = 0; j != matrix.width; j++) {
-                printf("%f (%p, %d, %d)", *matrix_index(matrix, i, j), matrix_index(matrix, i, j), i, j);
-                if (j == matrix.width - 1) {
-                    printf("]\n");
-                } else {
-                    printf(", ");
-                }
-            }
-        }
+        print_matrix_core(matrix);
     }
 }
 
@@ -155,10 +168,31 @@ __device__ void print_matrix(device_matrix_t matrix, char *name) {
 __device__ void print_vector(device_vector_t vector, char *name) {
     if (threadIdx.x == 0) {
         printf("%s: %d:\n", name, vector.size);
-        for (u32 i = 0; i != vector.size; i++) {
-            printf("[%f]\n", vector.vals[i]);
-        }
+        print_vector_core(vector);
     }
+}
+
+
+__global__ void host_print_matrix_kernel(device_matrix_t matrix) {
+    print_matrix_core(matrix);
+}
+
+__global__ void host_print_vector_kernel(device_vector_t vector) {
+    print_vector_core(vector);
+}
+
+void host_print_matrix(device_matrix_t matrix, char *name) {
+    printf("%s: (%d, %d):\n", name, matrix.height, matrix.width);
+    host_print_matrix_kernel<<<1, 1>>>(matrix);
+    cudaDeviceSynchronize();
+    printf("hei\n");
+}
+
+
+void host_print_vector(device_vector_t vector, char *name) {
+    printf("%s: %d:\n", name, vector.size);
+    host_print_vector_kernel<<<1, 1>>>(vector);
+    cudaDeviceSynchronize();
 }
 
 
