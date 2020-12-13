@@ -118,7 +118,9 @@ f32 **csv_parser_collect(csv_parser_t *parser, u32 *num_items_out) {
     while ((vector = csv_parser_next_alloc(parser)) != NULL) {
         if (num_rows == cap) {
             cap *= 2;
-            matrix = (f32 **) realloc(matrix, sizeof(f32) * cap);
+            u32 size = sizeof(f32 *) * cap;
+            printf("size: %d\n", size);
+            matrix = (f32 **) realloc(matrix, size);
             ASSERT_NOT_NULL(matrix);
         }
 
