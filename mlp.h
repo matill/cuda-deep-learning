@@ -38,7 +38,7 @@ typedef struct mlp_trainer {
 
 
 // Execution API
-void network_compute(mlp_t *mlp, device_vector_t *layer_outputs, device_vector_t *in_vector);
+void network_compute(mlp_t mlp, device_vector_t *layer_outputs, device_vector_t in_vector);
 void gradient_descent_update_host_vectors(mlp_t mlp, mlp_gradient_compute_data gradient_compute_data,
         host_vector_t input, host_vector_t output_truth, device_vector_t device_in_buf,
         device_vector_t device_out_buf, cost_func_t cost_func, f32 step_size);
